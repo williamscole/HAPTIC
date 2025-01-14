@@ -18,7 +18,7 @@ pip install -r requirements.txt
 
 Basic usage:
 ```bash
-python haptic.py -focal_file individuals.txt -relative_ibd_file ibd_segments.txt -out results
+python relative_clustering.py -focal_file individuals.txt -relative_ibd_file ibd_segments.txt -out results
 ```
 
 ## Required Arguments
@@ -125,17 +125,17 @@ The algorithm produces several output files with prefix specified by `-out` (def
 
 1. Basic run with minimal parameters:
 ```bash
-python haptic.py -focal_file individuals.txt -relative_ibd_file ibd_segments.txt
+python relative_clustering.py -focal_file individuals.txt -relative_ibd_file ibd_segments.txt
 ```
 
 2. Run with custom IBD filtering:
 ```bash
-python haptic.py -focal_file individuals.txt -relative_ibd_file ibd_segments.txt -min_seg_length 7.5 -min_k 15 -max_k 1500
+python relative_clustering.py -focal_file individuals.txt -relative_ibd_file ibd_segments.txt -min_seg_length 7.5 -min_k 15 -max_k 1500
 ```
 
 3. Batch processing with parent information:
 ```bash
-python haptic.py -focal_file family_data.txt -relative_ibd_file relatives_ibd.txt -parent_ibd_file parent_ibd.txt -batches batch,1,1-10
+python relative_clustering.py -focal_file family_data.txt -relative_ibd_file relatives_ibd.txt -parent_ibd_file parent_ibd.txt -batches batch,1,1-10
 ```
 
 ## Notes
@@ -155,7 +155,7 @@ Williams, C. M., O'Connell, J., Freyman, W. A., 23andMe Research Team, Gignoux, 
 
 ## License
 
-[License information to be added]
+GPL-3.0 license
 
 ## Contact
 
