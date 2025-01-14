@@ -159,16 +159,16 @@ HAPTIC is released under the GNU General Public License v3.0 (GPL-3.0).
 This means you are free to:
 
 Use the software for any purpose
--Change the software to suit your needs
--Share the software with others
--Share the changes you make
+- Change the software to suit your needs 
+- Share the software with others 
+- Share the changes you make 
 
 Under the following terms:
 
-You must include the original copyright and license notices in any copy of the software/source
-If you modify the code, you must release these modifications under the GPL-3.0
-You must state significant changes made to the software
-You must make your source code available when you distribute the software
+- You must include the original copyright and license notices in any copy of the software/source 
+- If you modify the code, you must release these modifications under the GPL-3.0 
+- You must state significant changes made to the software 
+- You must make your source code available when you distribute the software 
 
 For the full license text, see the LICENSE file in the repository.
 
