@@ -1,4 +1,4 @@
-# HAPTiC: HAPlotype TIling and Clustering
+# HAPTiC: HAPlotype Tiling and Clustering
 
 HAPTiC (HAPlotype Tiling and Clustering) is an algorithm for inter-chromosomal haplotype phasing that leverages IBD (Identity By Descent) segments to reconstruct ancestral haplotypes.
 
