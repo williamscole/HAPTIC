@@ -63,6 +63,11 @@ python relative_clustering.py -focal_file individuals.txt -relative_ibd_file ibd
 - `-relative_ibd_file`: Path to file containing IBD segments between relatives.
   - A pandas feather file in the [phasedibd](https://github.com/23andMe/phasedibd) format.
 
+  To convert a phasedibd pandas dataframe to a feather file, use:
+```python
+df.to_feather("path/to/ibd_segments.feather")
+```
+
 ## Optional Arguments
 
 ### Input Processing
