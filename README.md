@@ -11,7 +11,8 @@ HAPTiC uses IBD segments shared between individuals to cluster and reconstruct a
 ```bash
 git clone https://github.com/williamscole/HAPTIC.git
 cd HAPTIC
-pip install -r requirements.txt
+conda create -n haptic python=3.9 "numpy>=1.21.0" "pandas>=1.3.0" "networkx>=2.6.0"
+conda activate haptic
 ```
 
 HAPTiC works in two steps. The ```Clustering``` step takes IBD segments as input and, for each focal individual, clusters their IBD segments into two sets, each set corresponding to a parent of the focal individual. The ```Phasing``` step takes the output of the ```Clustering``` step and a pre-phased VCF to correct for long-range phase errors and phase inter-chromosomally.
