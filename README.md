@@ -11,7 +11,7 @@ HAPTiC uses IBD segments shared between individuals to cluster and reconstruct a
 ```bash
 git clone https://github.com/williamscole/HAPTIC.git
 cd HAPTIC
-conda create -n haptic python=3.9 "numpy>=1.21.0" "pandas>=1.3.0" "networkx>=2.6.0"
+conda create -n haptic python=3.9 "numpy>=1.21.0" "pandas>=1.3.0" "networkx>=2.6.0" matplotlib seaborn  pyarrow
 conda activate haptic
 ```
 
@@ -170,6 +170,26 @@ python phase_vcf.py -phase -vcf input.vcf -map chr1.map -chr 1 -results clusteri
 - `-results`: the ```[output]_results.pkl``` file from the ```Clustering``` step.
 - `-output`: the full path and file name of the outputted VCF.
 - `-write_phase`: instructs the program to write out the phase.
+
+# Example run
+
+# HAPTIC Example Dataset
+
+We have provided a simple dataset for users to test HAPTIC.
+
+## Clustering Step
+
+```bash
+python relative_clustering.py -focal_file example/focal_ids.txt -relative_ibd_file example/ibd_segments.feather -single_ibd_file -min_seg_length 5 -min_k 0 -keepROH -out example/clustering
+```
+
+## Phasing Step
+
+```bash
+python phase_vcf.py -phase -vcf example/chr1.vcf -map example/chr1.map -chr 1 -results example/clustering_results.pkl -write_phase
+```
+
+See the README in ```examples/```
 
 # Citation
 
