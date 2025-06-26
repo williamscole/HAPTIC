@@ -2,6 +2,33 @@
 
 HAPTiC (HAPlotype Tiling and Clustering) is an algorithm for inter-chromosomal haplotype phasing that leverages IBD (Identity By Descent) segments to reconstruct ancestral haplotypes.
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Installation](#installation)
+- [Clustering](#clustering)
+  - [Usage](#usage)
+  - [Required Arguments](#required-arguments)
+  - [Optional Arguments](#optional-arguments)
+    - [Input Processing](#input-processing)
+    - [IBD Filtering Parameters](#ibd-filtering-parameters)
+    - [Chromosome Processing](#chromosome-processing)
+    - [ROH and IBD Density Processing](#roh-and-ibd-density-processing)
+    - [Performance Options](#performance-options)
+    - [Additional Features](#additional-features)
+  - [Output](#output)
+  - [Examples](#examples)
+  - [Notes](#notes)
+- [Phasing](#phasing)
+  - [Usage](#usage-1)
+  - [Required Arguments](#required-arguments-1)
+- [Example Run](#example-run)
+  - [Clustering Step](#clustering-step)
+  - [Phasing Step](#phasing-step)
+- [Citation](#citation)
+- [License](#license)
+- [Contact](#contact)
+
 ## Overview
 
 HAPTiC uses IBD segments shared between individuals to cluster and reconstruct ancestral haplotypes. It can process both autosomal and X chromosome data, handle parent-child relationships, and includes features for ROH (runs of homozygosity) detection and filtering of high IBD density regions.
@@ -171,7 +198,7 @@ python phase_vcf.py -phase -vcf input.vcf -map chr1.map -chr 1 -results clusteri
 - `-output`: the full path and file name of the outputted VCF.
 - `-write_phase`: instructs the program to write out the phase.
 
-# Example run
+# Example Run
 
 We have provided a simple dataset for users to test HAPTIC.
 
