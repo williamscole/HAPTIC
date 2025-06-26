@@ -9,8 +9,8 @@ HAPTiC uses IBD segments shared between individuals to cluster and reconstruct a
 ## Installation
 
 ```bash
-git clone https://github.com/williamscole/haptic.git
-cd haptic
+git clone https://github.com/williamscole/HAPTIC.git
+cd HAPTIC
 pip install -r requirements.txt
 ```
 
