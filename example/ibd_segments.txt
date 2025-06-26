@@ -1,0 +1,9 @@
+id1 id1_haplotype   id2 id2_haplotype   chromosome  start_cm    end_cm
+focal   0   A   1   1   0   10
+focal   0   A   1   1   20  40
+focal   1   B   1   1   60  90
+focal   1   C   1   1   85  100
+focal   1   D   1   1   5   19
+focal   1   E   1   1   30  59
+focal   0   E   1   1   90  95
+focal   0   F   1   1   75  85

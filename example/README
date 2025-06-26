@@ -1,0 +1,10 @@
+In this example, we have a focal individual called "focal" and they share IBD segments with 6 relatives:
+A, B, C are paternal relatives, and they share IBD with the focal individual on haplotype index 0, until a switch error between 59 and 60 cM.
+D, E, F are maternal relatives, and they share IBD with the focal individual on haplotype index 1, until a switch error between 59 and 60 cM.
+
+We have a chromosome of length 100 cM.
+
+There are three tiles:
+Tile 1: 0 cM -> 19 cM [{A}, {D}]
+Tile 2: 20 cM -> 59 cM [{A}, {E}]
+tile 3: 60 cM -> 100 cM [{B, C}, {E, F}]
