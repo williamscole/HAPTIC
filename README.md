@@ -4,7 +4,7 @@ HAPTiC (HAPlotype Tiling and Clustering) is an algorithm for inter-chromosomal h
 
 ## Overview
 
-HAPTiC uses IBD segments shared between individuals to cluster and reconstruct ancestral haplotypes. It can process both autosomal and X chromosome data, handle parent-child relationships, and includes features for ROH (Runs of Homozygosity) detection and filtering of high IBD density regions.
+HAPTiC uses IBD segments shared between individuals to cluster and reconstruct ancestral haplotypes. It can process both autosomal and X chromosome data, handle parent-child relationships, and includes features for ROH (runs of homozygosity) detection and filtering of high IBD density regions.
 
 ## Installation
 
