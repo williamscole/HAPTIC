@@ -173,8 +173,6 @@ python phase_vcf.py -phase -vcf input.vcf -map chr1.map -chr 1 -results clusteri
 
 # Example run
 
-# HAPTIC Example Dataset
-
 We have provided a simple dataset for users to test HAPTIC.
 
 ## Clustering Step
