@@ -1,10 +1,10 @@
-# HAPTIC: HAPlotype TIling and Clustering
+# HAPTiC: HAPlotype TIling and Clustering
 
-HAPTIC (HAPlotype TIling and Clustering) is an algorithm for inter-chromosomal haplotype phasing that leverages IBD (Identity By Descent) segments to reconstruct ancestral haplotypes.
+HAPTiC (HAPlotype Tiling and Clustering) is an algorithm for inter-chromosomal haplotype phasing that leverages IBD (Identity By Descent) segments to reconstruct ancestral haplotypes.
 
 ## Overview
 
-HAPTIC uses IBD segments shared between individuals to cluster and reconstruct ancestral haplotypes. It can process both autosomal and X chromosome data, handle parent-child relationships, and includes features for ROH (Runs of Homozygosity) detection and filtering of high IBD density regions.
+HAPTiC uses IBD segments shared between individuals to cluster and reconstruct ancestral haplotypes. It can process both autosomal and X chromosome data, handle parent-child relationships, and includes features for ROH (Runs of Homozygosity) detection and filtering of high IBD density regions.
 
 ## Installation
 
@@ -14,11 +14,16 @@ cd haptic
 pip install -r requirements.txt
 ```
 
+HAPTiC works in two steps. The ```Clustering``` step takes IBD segments as input and, for each focal individual, clusters their IBD segments into two sets, each set corresponding to a parent of the focal individual. The ```Phasing``` step takes the output of the ```Clustering``` step and a pre-phased VCF to correct for long-range phase errors and phase inter-chromosomally.
+
+
+# **Clustering**
+
 ## Usage
 
 Basic usage:
 ```bash
-python relative_clustering.py -focal_file individuals.txt -relative_ibd_file ibd_segments.txt -out results
+python relative_clustering.py -focal_file individuals.txt -relative_ibd_file ibd_segments.feather -out results
 ```
 
 ## Required Arguments
@@ -27,7 +32,8 @@ python relative_clustering.py -focal_file individuals.txt -relative_ibd_file ibd
   - First column: Individual IDs
   - Second and third columns (optional): Parent IDs
   
-- `-relative_ibd_file`: Path to file containing IBD segments between relatives
+- `-relative_ibd_file`: Path to file containing IBD segments between relatives.
+  - A pandas feather file in the [phasedibd](https://github.com/23andMe/phasedibd) format.
 
 ## Optional Arguments
 
@@ -41,7 +47,7 @@ python relative_clustering.py -focal_file individuals.txt -relative_ibd_file ibd
 - `-parent_ibd_file`: Path to file containing IBD segments shared with parents
   - Default: Empty string
 
-- `-single_ibd_file`: Flag to indicate all chromosomes are in one IBD file
+- `-single_ibd_file`: Flag to indicate all chromosomes are in one IBD file. If flag is not used, please supply the file for chromosome 1, and HAPTiC will look for the other chromosomes' files. 
   - Default: False (expects separate files per chromosome)
 
 ### IBD Filtering Parameters
@@ -93,7 +99,7 @@ python relative_clustering.py -focal_file individuals.txt -relative_ibd_file ibd
 
 ### Additional Features
 
-- `-sex_file`: Path to file containing sex information
+- `-sex_file`: Path to file containing sex information. A two-column file with `[Individual ID]` and `[Sex Code]` where `1` = male, `2` = female.
   - Default: None
 
 - `-dev_mode`: Enable developer mode
@@ -105,7 +111,7 @@ python relative_clustering.py -focal_file individuals.txt -relative_ibd_file ibd
 - `-ibd_pkl`: Path to pre-pickled IBD file
   - Default: Empty string
 
-- `-hap_annotation`: Only perform haplotype annotation
+- `-hap_annotation`: Only perform haplotype annotation. This uses focal-parent IBD segments and outputs the pre-phased regions (haplotype index and coordinates) that were inherited from each parent.
   - Default: False
 
 - `-continue_run`: Continue previous run, append to existing results
@@ -125,17 +131,17 @@ The algorithm produces several output files with prefix specified by `-out` (def
 
 1. Basic run with minimal parameters:
 ```bash
-python relative_clustering.py -focal_file individuals.txt -relative_ibd_file ibd_segments.txt
+python relative_clustering.py -focal_file individuals.txt -relative_ibd_file ibd_segments.feather
 ```
 
 2. Run with custom IBD filtering:
 ```bash
-python relative_clustering.py -focal_file individuals.txt -relative_ibd_file ibd_segments.txt -min_seg_length 7.5 -min_k 15 -max_k 1500
+python relative_clustering.py -focal_file individuals.txt -relative_ibd_file ibd_segments.feather -min_seg_length 7.5 -min_k 15 -max_k 1500
 ```
 
 3. Batch processing with parent information:
 ```bash
-python relative_clustering.py -focal_file family_data.txt -relative_ibd_file relatives_ibd.txt -parent_ibd_file parent_ibd.txt -batches batch,1,1-10
+python relative_clustering.py -focal_file family_data.txt -relative_ibd_file relatives_ibd.feather -parent_ibd_file parent_ibd.feather -batches batch,1,1-10
 ```
 
 ## Notes
@@ -145,17 +151,36 @@ python relative_clustering.py -focal_file family_data.txt -relative_ibd_file rel
 - Use `-dev_mode` for additional debugging information
 - The `-coverage_gain` parameter can significantly speed up processing for large datasets data
 
-## Citation
+# **Phasing**
 
-If you use HAPTIC in your research, please cite our preprint:
+## Usage
+
+Basic usage:
+```bash
+python phase_vcf.py -phase -vcf input.vcf -map chr1.map -chr 1 -results clustering_results.pkl -output corrected_input.vcf -write_phase
+```
+
+## Required Arguments
+
+- `-phase`: this flag instructs the program to phase the input VCF.
+- `-vcf`: a ```.vcf``` file that is pre-phased with Beagle, SHAPEIT, or Eagle. This must be the same file that was used to call the IBD input in the ```Clustering``` step.
+- `-map`: a PLINK-formatted .map file whose sites correspond to the VCF sites. HAPTiC expects the .map file for chromosome 1 and will find the .map file for the other chromosomes.
+- `-chr`: the chromosome number of the VCF.
+- `-results`: the ```[output]_results.pkl``` file from the ```Clustering``` step.
+- `-output`: the full path and file name of the outputted VCF.
+- `-write_phase`: instructs the program to write out the phase.
+
+# Citation
+
+If you use HAPTiC in your research, please cite our preprint:
 
 ```
-Williams, C. M., O'Connell, J., Freyman, W. A., 23andMe Research Team, Gignoux, C. R., Ramachandran, S., & Williams, A. L. (2024). Phasing millions of samples achieves near perfect accuracy, enabling parent-of-origin classification of variants. bioRxiv, 2024.05.06.592816. Cold Spring Harbor Laboratory.
+Williams, C. M., O'Connell, J., Jewett, E., Freyman, W. A., 23andMe Research Team, Gignoux, C. R., Ramachandran, S., & Williams, A. L. (2024). Phasing millions of samples achieves near perfect accuracy, enabling parent-of-origin classification of variants. bioRxiv, 2024.05.06.592816. Cold Spring Harbor Laboratory.
 ```
 
 ## License
 
-HAPTIC is released under the GNU General Public License v3.0 (GPL-3.0).
+HAPTiC is released under the GNU General Public License v3.0 (GPL-3.0).
 This means you are free to:
 
 Use the software for any purpose
