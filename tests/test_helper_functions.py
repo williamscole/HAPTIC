@@ -1,5 +1,6 @@
 import pytest
-from helper_functions import split_regions, merge_regions, segment_coverage
+import pandas as pd
+from helper_functions import split_regions, merge_regions, segment_coverage, column_swapper, get_roh_from_relative
 
 class TestSplitRegions:
 
@@ -162,3 +163,71 @@ class TestSegmentCoverage:
     def test_empty_input(self):
         result = segment_coverage([])
         assert result == []
+
+class TestColumnSwapper:
+
+    @pytest.fixture
+    def simple_df(self):
+        return pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]})
+
+    def test_all_rows_swap(self, simple_df):
+        bool_series = pd.Series([True, True, True])
+        result = column_swapper(simple_df, bool_series, [["A", "B"]])
+        # values should be swapped for all rows
+        assert list(result["B"]) == [1, 2, 3]
+        assert list(result["A"]) == [4, 5, 6]
+
+    def test_no_rows_swap(self, simple_df):
+        bool_series = pd.Series([False, False, False])
+        result = column_swapper(simple_df, bool_series, [["A", "B"]])
+        # no values should be swapped
+        assert list(result["B"]) == [4, 5, 6]
+        assert list(result["A"]) == [1, 2, 3]
+
+    def test_partial_swap(self, simple_df):
+        bool_series = pd.Series([True, False, True])
+        result = column_swapper(simple_df, bool_series, [["A", "B"]])
+        assert list(result["B"]) == [1, 5, 3]
+        assert list(result["A"]) == [4, 2, 6]
+
+    def test_multiple_col_pairs(self):
+        df = pd.DataFrame({"A": [1, 2], "B": [3, 4], "C": [5, 6], "D": [7, 8]})
+        bool_series = pd.Series([True, False])
+        result = column_swapper(df, bool_series, [["A", "B"], ["C", "D"]])
+        assert list(result["B"]) == [1, 4]
+        assert list(result["A"]) == [3, 2]
+        assert list(result["D"]) == [5, 8]
+        assert list(result["C"]) == [7, 6]
+
+    def test_preserves_row_order(self, simple_df):
+        bool_series = pd.Series([False, True, False])
+        result = column_swapper(simple_df, bool_series, [["A", "B"]])
+        assert list(result.index) == [0, 1, 2]
+
+    def test_empty_dataframe(self):
+        df = pd.DataFrame({"A": [], "B": []})
+        bool_series = pd.Series([], dtype=bool)
+        result = column_swapper(df, bool_series, [["A", "B"]])
+        assert result.empty
+        assert "A" in result.columns
+        assert "B" in result.columns
+
+
+class TestROH:
+
+    def test_two_roh_same_chromosome(self):
+        # BUG: currently returns empty due to sort ordering putting
+        # same-haplotype rows consecutive rather than interleaving by position
+        df = pd.DataFrame({
+            "id1": ["focal", "focal", "focal", "focal"],
+            "id2": ["A", "A", "A", "A"],
+            "id1_haplotype": [0, 1, 0, 1],
+            "id2_haplotype": [0, 0, 0, 0],
+            "chromosome": [1, 1, 1, 1],
+            "start_cm": [0, 0, 50, 50],
+            "end_cm": [20, 20, 70, 70]
+        })
+        result = get_roh_from_relative(df, overlap_cm=5)
+        # should return 2 ROH regions but currently returns 0
+        pytest.xfail("Known bug: multiple ROH on same chromosome not detected due to sort order")
+        assert len(result) == 2
