@@ -1,0 +1,16 @@
+name: haptic
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.9
+  - numpy>=1.21.0
+  - pandas>=1.3.0
+  - networkx>=2.6.0
+  - matplotlib>=3.4.0
+  - seaborn>=0.11.0
+  - pyarrow>=5.0.0
+  - pip
+  - pip:
+    - scikit-allel>=1.3.5
