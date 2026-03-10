@@ -6,6 +6,8 @@ HAPTiC (HAPlotype Tiling and Clustering) is an algorithm for inter-chromosomal h
 
 - [Overview](#overview)
 - [Installation](#installation)
+  - [Option 1: pip / venv](#option-1-pip--venv)
+  - [Option 2: conda](#option-2-conda)
 - [Clustering](#clustering)
   - [Usage](#usage)
   - [Required Arguments](#required-arguments)
@@ -38,9 +40,24 @@ HAPTiC uses IBD segments shared between individuals to cluster and reconstruct a
 ```bash
 git clone https://github.com/williamscole/HAPTIC.git
 cd HAPTIC
-conda create -n haptic python=3.9 "numpy>=1.21.0" "pandas>=1.3.0" "networkx>=2.6.0" matplotlib seaborn  pyarrow
+```
+
+### Option 1: pip / venv
+
+```bash
+python -m venv haptic_env
+source haptic_env/bin/activate        # On Windows: haptic_env\Scripts\activate
+pip install -r requirements.txt
+```
+
+### Option 2: conda
+
+```bash
+conda env create -f environment.yaml
 conda activate haptic
 ```
+
+> **Note:** The conda environment installs `scikit-allel` via pip, as it is more reliably available through PyPI than conda channels. All other dependencies are installed from `conda-forge`.
 
 HAPTiC works in two steps. The ```Clustering``` step takes IBD segments as input and, for each focal individual, clusters their IBD segments into two sets, each set corresponding to a parent of the focal individual. The ```Phasing``` step takes the output of the ```Clustering``` step and a pre-phased VCF to correct for long-range phase errors and phase inter-chromosomally.
 
@@ -210,13 +227,13 @@ We have provided a simple dataset for users to test HAPTIC.
 ## Clustering Step
 
 ```bash
-python relative_clustering.py -focal_file example/focal_ids.txt -relative_ibd_file example/ibd_segments.feather -single_ibd_file -min_seg_length 5 -min_k 0 -keepROH -out example/clustering
+python3 relative_clustering.py -focal_file example/focal_ids.txt -relative_ibd_file example/ibd_segments.feather -single_ibd_file -min_seg_length 5 -min_k 0 -keepROH -out example/clustering
 ```
 
 ## Phasing Step
 
 ```bash
-python phase_vcf.py -phase -vcf example/chr1.vcf -map example/chr1.map -chr 1 -results example/clustering_results.pkl -write_phase
+python3 phase_vcf.py -phase -vcf example/chr1.vcf -map example/chr1.map -chr 1 -results example/clustering_results.pkl -write_phase
 ```
 
 See the README in ```examples/```
