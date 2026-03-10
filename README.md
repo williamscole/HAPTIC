@@ -21,6 +21,14 @@ HAPTiC (HAPlotype Tiling and Clustering) is an algorithm for inter-chromosomal h
   - [Output](#output)
   - [Examples](#examples)
   - [Notes](#notes)
+- [Working with the Results Object](#working-with-the-results-object)
+  - [Loading the Results](#loading-the-results)
+  - [Iterating Over Individuals](#iterating-over-individuals)
+  - [Getting the Optimal Clustering](#getting-the-optimal-clustering)
+  - [Getting Tiles for a Specific Threshold](#getting-tiles-for-a-specific-threshold)
+  - [Clustering Summary](#clustering-summary)
+  - [Accessing IBD Segments](#accessing-ibd-segments)
+  - [Full Example](#full-example)
 - [Phasing](#phasing)
   - [Usage](#usage-1)
   - [Required Arguments](#required-arguments-1)
@@ -200,6 +208,179 @@ python relative_clustering.py -focal_file family_data.txt -relative_ibd_file rel
 - Adjust `-stdevs` parameter based on your population's IBD density distribution
 - Use `-dev_mode` for additional debugging information
 - The `-coverage_gain` parameter can significantly speed up processing for large datasets data
+
+---
+
+# **Working with the Results Object**
+
+The clustering step produces a `{out}_results.pkl` file. This is a Python pickle file containing a `StoreResults` object that holds the clustering output for every focal individual. This section explains how to load, explore, and extract useful data from this object.
+
+## Loading the Results
+
+```python
+import pickle as pkl
+
+with open("clustering_results.pkl", "rb") as f:
+    results = pkl.load(f)
+```
+
+The `results` object has one main attribute and one method for accessing the data:
+
+- `results.focal_ids` — a list of all focal individual IDs that were successfully clustered.
+- `results.iterator()` — returns an iterator of `(focal_id, focal_cluster_object)` pairs (see below).
+
+Each focal individual's clustering is stored as an attribute on the results object. For example, if `"sample_001"` was clustered, its data lives at `results.sample_001`. In practice, you'll almost always want to use the iterator rather than accessing these directly.
+
+## Iterating Over Individuals
+
+The most common pattern for working with the results is to loop over all focal individuals:
+
+```python
+for focal_id, focal_obj in results.iterator():
+    print(focal_id)
+    # focal_obj is a FocalCluster object (see below)
+```
+
+Each `focal_obj` is a `FocalCluster` object with the following key attributes and methods:
+
+| Attribute / Method | Type | Description |
+|---|---|---|
+| `focal_obj.focal` | `str` | The focal individual's ID |
+| `focal_obj.male` | `bool` | Whether the focal individual is male |
+| `focal_obj.scheme` | `bool` | `True` if clustering was run successfully |
+| `focal_obj.segments` | `DataFrame` | The processed IBD segments used for clustering |
+| `focal_obj.tile_df` | `DataFrame` | The full tile dataframe with all clustering columns |
+| `focal_obj.clusterings` | `dict` | Maps `(t1, t2)` threshold pairs to clustering results |
+| `focal_obj.get_optimal(tile_df=False)` | method | Returns the best clustering (see below) |
+| `focal_obj.return_tiles(t1, t2)` | method | Returns the tile dataframe for a specific threshold pair |
+| `focal_obj.cluster_summary()` | method | Returns a summary dataframe of all clusterings |
+
+## Getting the Optimal Clustering
+
+HAPTiC tries multiple threshold combinations (`t1`, `t2`) and selects the best one automatically. To get the optimal result:
+
+```python
+for focal_id, focal_obj in results.iterator():
+    # Get the optimal clustering metadata
+    optimal = focal_obj.get_optimal()
+    print(f"{focal_id}: eigenvalue = {optimal.eigenval1}, coverage = {optimal.tot_cov} cM")
+```
+
+The object returned by `get_optimal()` (without `tile_df=True`) is a `SpectralCluster` object with these attributes:
+
+| Attribute | Type | Description |
+|---|---|---|
+| `eigenval1` | `float` | Smallest relevant eigenvalue of the signed Laplacian. Lower is better; a value near 0 indicates clean separation into two parental clusters. |
+| `tot_cov` | `float` | Total genomic coverage (in cM) of the tiles used in this clustering. |
+| `optimal` | `bool` | `True` if this was selected as the best clustering. |
+| `worked` | `bool` | `True` if the spectral clustering succeeded. |
+| `t1` | `int` | The `t1` threshold (minimum segment length in cM for edge inclusion). |
+| `t2` | `int` | The `t2` threshold (minimum kinship in cM for edge inclusion). |
+| `x1` | `float` | Total IBD (cM) on the X chromosome assigned to cluster 1. |
+| `x2` | `float` | Total IBD (cM) on the X chromosome assigned to cluster 2. |
+
+To get the optimal tile dataframe (which is what the phasing step uses):
+
+```python
+tile_df = focal_obj.get_optimal(tile_df=True)
+```
+
+This returns a DataFrame with the following columns:
+
+| Column | Description |
+|---|---|
+| `chromosome` | Chromosome number (1–23, where 23 = X) |
+| `coord` | Tuple of `(start_cM, end_cM)` for the tile |
+| `cluster1` | List of relative segment IDs assigned to parental cluster 1 |
+| `cluster2` | List of relative segment IDs assigned to parental cluster 2 |
+| `segs1` | List of segment indices corresponding to `cluster1` |
+| `segs2` | List of segment indices corresponding to `cluster2` |
+| `haplotype1` | Haplotype index (0 or 1) associated with cluster 1 |
+| `haplotype2` | Haplotype index (0 or 1) associated with cluster 2 |
+| `sex` | `True` if the clusters are ordered as [maternal, paternal] based on X-chromosome IBD (males only); `False` otherwise |
+
+Each relative segment ID in `cluster1`/`cluster2` is a tuple of `(relative_id, segment_number, kinship_cM, merged_segment_length)`.
+
+## Getting Tiles for a Specific Threshold
+
+If you want to inspect the clustering at a particular `(t1, t2)` threshold rather than the optimal:
+
+```python
+tile_df = focal_obj.return_tiles(t1=10, t2=50)
+```
+
+The returned DataFrame has the same columns as described above. If the requested threshold was not run, this returns an empty DataFrame.
+
+## Clustering Summary
+
+To get a quick overview of all threshold combinations that were tried for a focal individual:
+
+```python
+summary = focal_obj.cluster_summary()
+print(summary)
+```
+
+This returns a DataFrame with one row per threshold combination:
+
+| Column | Description |
+|---|---|
+| `focal` | Focal individual ID |
+| `t1` | Segment length threshold |
+| `t2` | Kinship threshold |
+| `tot_cov` | Total tile coverage in cM |
+| `eigenval1` | Smallest eigenvalue (lower = cleaner clustering) |
+| `optimal` | `True` for the selected best clustering |
+
+## Accessing IBD Segments
+
+The processed IBD segments used for clustering are stored on each focal object:
+
+```python
+segments = focal_obj.segments
+```
+
+This is a DataFrame with columns `id2`, `id1_haplotype`, `chromosome`, `start_cm`, and `end_cm`. The `id2` column contains tuple IDs of the form `(relative_id, segment_number, kinship_cM, merged_segment_length)`.
+
+## Full Example
+
+```python
+import pickle as pkl
+import pandas as pd
+
+# Load results
+with open("clustering_results.pkl", "rb") as f:
+    results = pkl.load(f)
+
+# Summarize all focal individuals
+rows = []
+for focal_id, focal_obj in results.iterator():
+    opt = focal_obj.get_optimal()
+    rows.append({
+        "focal": focal_id,
+        "eigenvalue": opt.eigenval1,
+        "coverage_cM": opt.tot_cov,
+        "t1": opt.t1,
+        "t2": opt.t2,
+        "is_male": focal_obj.male
+    })
+
+summary = pd.DataFrame(rows)
+print(summary)
+
+# Get the tile dataframe for the first individual
+focal_id, focal_obj = next(results.iterator())
+tile_df = focal_obj.get_optimal(tile_df=True)
+
+# Print tiles for chromosome 1
+chr1_tiles = tile_df[tile_df.chromosome == 1]
+for _, tile in chr1_tiles.iterrows():
+    start, end = tile.coord
+    n_cluster1 = len(tile.cluster1)
+    n_cluster2 = len(tile.cluster2)
+    print(f"  {start:.1f}-{end:.1f} cM: {n_cluster1} relatives in cluster 1, {n_cluster2} in cluster 2")
+```
+
+---
 
 # **Phasing**
 
