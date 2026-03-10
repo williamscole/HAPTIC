@@ -428,8 +428,8 @@ def get_roh_from_relative(df, overlap_cm):
     same_id2_hap = sorted_df.id2_haplotype == sorted_df.shift(-1).id2_haplotype
 
     ### get the start and end of putative overlaps
-    overlap_start = np.maximum(sorted_df.start_cm, sorted_df.shift(-1).start_cm)
-    overlap_end = np.minimum(sorted_df.end_cm, sorted_df.shift(-1).end_cm)
+    overlap_start = np.maximum(sorted_df.start_cm, sorted_df.shift(-1).start_cm.astype(float))
+    overlap_end = np.minimum(sorted_df.end_cm, sorted_df.shift(-1).end_cm.astype(float))
 
     ### req all bools to be true and the overlap to be greater than overlap_cm
     roh_bool = (overlap_end - overlap_start > overlap_cm) & same_chrom & same_id1 & same_id2 & diff_id1_hap & same_id2_hap
