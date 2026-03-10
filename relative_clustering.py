@@ -496,7 +496,8 @@ class Tiles:
                 tmp[f"segs{hap+1}"] = tmp[f"info{hap}"].apply(lambda x: [i[2] for i in x])
 
             # add the coord column
-            tmp["coord"] = tmp.apply(lambda x: (x.start_cm, x.end_cm), axis=1)
+            tmp["coord"] = list(zip(tmp["start_cm"], tmp["end_cm"]))
+
 
             # add the chromosome col
             tmp["chromosome"] = chrom
@@ -885,7 +886,7 @@ def runClustering(focal, male_bool, segment_df, descendant_t, gain_t, t2s):
             return clusters
 
         # add a col to each segment of the close relatives indicating which cluster they belong to
-        closeRel["cluster"] = closeRel[["start_cm", "end_cm", "id1_haplotype", "chromosome"]].apply(lambda x: overlaps_tile(*x, cluster_tiles), axis=1)
+        closeRel["cluster"] = [overlaps_tile(r.start_cm, r.end_cm, r.id1_haplotype, r.chromosome, cluster_tiles) for _, r in closeRel.iterrows()]
 
         # add column that is just the relative identifier
         closeRel["id_name"] = closeRel["id2"].apply(lambda x: x[0])
