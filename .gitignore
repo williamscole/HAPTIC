@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Data files
+*.pkl
+*.feather
+
+# Mac
+.DS_Store
