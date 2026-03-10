@@ -301,6 +301,16 @@ This returns a DataFrame with the following columns:
 
 Each relative segment ID in `cluster1`/`cluster2` is a tuple of `(relative_id, segment_number, kinship_cM, merged_segment_length)`.
 
+### Threshold Columns in the Raw Tile DataFrame
+
+The raw tile DataFrame (accessed via `focal_obj.tile_df`) also contains additional columns corresponding to each `(t1, t2)` threshold pair that was tested during clustering. These columns are named as tuples, e.g. `(10, 50)`, `(5, 100)`, etc. The values in these columns indicate how each tile relates to the global parental assignment for that clustering:
+
+- **`False`** — the tile's original haplotype labeling is already consistent with the global parental assignment.
+- **`True`** — the tile's `cluster1`/`cluster2` (and their associated haplotype indices) need to be swapped to align with the global parental assignment.
+- **`NaN`** — the tile was not connected to the main graph under this threshold pair (the thresholds were too conservative for any qualifying edges to reach this tile).
+
+When `return_tiles(t1, t2)` is called, it drops all tiles that are `NaN` for that threshold, then uses the `True`/`False` values to swap `cluster1`↔`cluster2`, `segs1`↔`segs2`, and `haplotype1`↔`haplotype2` where needed, so that `cluster1` consistently represents the same parent across all returned tiles.
+
 ## Getting Tiles for a Specific Threshold
 
 If you want to inspect the clustering at a particular `(t1, t2)` threshold rather than the optimal:
